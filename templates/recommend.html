@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookVerse - Recommendations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #0f0f1e;
+            --secondary-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --accent-primary: #e94560;
+            --accent-secondary: #f39c12;
+            --text-primary: #ffffff;
+            --text-secondary: #b8bcc8;
+            --border-color: rgba(233, 69, 96, 0.2);
+            --transition-cubic: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, #1a1a2e 50%, var(--secondary-bg) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -10%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(243, 156, 18, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+
+        nav {
+            background: rgba(15, 15, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-family: 'Crimson Text', serif;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.3s var(--transition-cubic);
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s var(--transition-cubic);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-section {
+            margin-bottom: 4rem;
+            text-align: center;
+            animation: slideInDown 0.8s ease;
+        }
+
+        .header-title {
+            font-family: 'Crimson Text', serif;
+            font-size: 64px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+            line-height: 1.2;
+        }
+
+        .header-title-highlight {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2.5rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .book-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(22, 33, 62, 0.5) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.4s var(--transition-cubic);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(233, 69, 96, 0.1) 50%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .book-card:hover {
+            transform: translateY(-16px) scale(1.02);
+            border-color: rgba(233, 69, 96, 0.5);
+            box-shadow: 0 24px 60px rgba(233, 69, 96, 0.25);
+        }
+
+        .book-card:hover::before {
+            opacity: 1;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 360px;
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.15) 0%, rgba(243, 156, 18, 0.05) 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .book-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s var(--transition-cubic);
+        }
+
+        .book-card:hover img {
+            transform: scale(1.12) rotate(1deg);
+        }
+
+        .ribbon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s var(--transition-cubic);
+        }
+
+        .book-card:hover .ribbon {
+            transform: scale(1.1);
+        }
+
+        .ribbon-icon {
+            color: white;
+            font-size: 20px;
+            transform: rotate(-45deg);
+        }
+
+        .card-body-content {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            background: linear-gradient(180deg, rgba(22, 33, 62, 0.6) 0%, rgba(26, 26, 46, 0.8) 100%);
+            position: relative;
+            z-index: 2;
+        }
+
+        .book-title {
+            font-family: 'Crimson Text', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-author {
+            color: var(--accent-primary);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .author-icon {
+            width: 20px;
+            height: 20px;
+            background: rgba(233, 69, 96, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--accent-primary);
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.3rem;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .star {
+            color: var(--accent-secondary);
+            font-size: 13px;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-cubic);
+            margin-top: auto;
+            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .add-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(233, 69, 96, 0.4);
+        }
+
+        .add-button:hover::before {
+            left: 100%;
+        }
+
+        .add-button:active {
+            transform: translateY(-1px);
+        }
+
+        .add-button.added {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .back-link a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--accent-secondary);
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1024px) {
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 2rem;
+            }
+
+            .header-title {
+                font-size: 48px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+                font-size: 12px;
+            }
+
+            .header-title {
+                font-size: 36px;
+            }
+
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .container {
+                padding: 3rem 1rem;
+            }
+
+            .card-body-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 28px;
+            }
+
+            .books-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 24px;
+            }
+
+            .book-title {
+                font-size: 20px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <div class="brand-icon">B</div>
+                BookWorld
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/recommend">Recommend</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1 class="header-title">
+                Recommended <span class="header-title-highlight">For You</span>
+            </h1>
+            <p class="header-subtitle">Books similar to your search</p>
+        </div>
+
+        <div class="books-grid">
+            {% if data %}
+                {% for item in data %}
+                <div class="book-card">
+                    <div class="image-container">
+                        <div class="ribbon">
+                            <span class="ribbon-icon">★</span>
+                        </div>
+                        <img src="{{ item[2] }}" alt="{{ item[0] }}" onerror="this.src='https://via.placeholder.com/280x360?text=Book+Cover'">
+                    </div>
+                    <div class="card-body-content">
+                        <h3 class="book-title">{{ item[0] }}</h3>
+                        <p class="book-author">
+                            <span class="author-icon">
+                                <i class="fas fa-pen-fancy"></i>
+                            </span>
+                            {% if item[1] %}{{ item[1] }}{% else %}Unknown Author{% endif %}
+                        </p>
+                        
+                        <div class="rating-stars">
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                        </div>
+
+                        <button class="add-button" onclick="addToWishlist(this, '{{ item[0] }}')">Add to Wishlist</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No recommendations found</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="back-link">
+            <a href="/recommend">← Search Another Book</a>
+        </div>
+    </div>
+
+    <script>
+        function addToWishlist(button, bookTitle) {
+            if (button.classList.contains('added')) {
+                return;
+            }
+
+            button.classList.add('added');
+            const originalText = button.textContent;
+            button.textContent = 'Added ✓';
+
+            let wishlist = JSON.parse(localStorage.getItem('bookWishlist') || '[]');
+            if (!wishlist.includes(bookTitle)) {
+                wishlist.push(bookTitle);
+                localStorage.setItem('bookWishlist', JSON.stringify(wishlist));
+            }
+
+            setTimeout(() => {
+                button.classList.remove('added');
+                button.textContent = originalText;
+            }, 2000);
+        }
+
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem('bookWishlist') || '[]');
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Wishlist:', getWishlist());
+        });
+    </script>
+</body>
+</html>
